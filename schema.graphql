@@ -1,0 +1,766 @@
+schema {
+  query: RootQueryType
+  mutation: RootMutationType
+  subscription: RootSubscriptionType
+}
+
+type Access {
+  """Lists invited users"""
+  pendingUsers(after: String, before: String, first: Int, last: Int): PendingAccountUsersConnection
+
+  """Lists active users"""
+  users(after: String, before: String, first: Int, last: Int): AccountUsersConnection
+}
+
+"""A registered account"""
+type Account implements Node {
+  """The users that can access the account"""
+  access: Access
+  businessName: String
+  businessType: String
+
+  """The account's curator profile"""
+  curator: Curator
+  id: ID!
+
+  """The account's locations"""
+  locations(after: String, before: String, first: Int, last: Int): LocationConnection
+
+  """The account's added soundtracks, playlists and schedules"""
+  musicLibrary: MusicLibrary
+
+  """
+  The account's sound zones (the zones are also available under each location)
+  """
+  soundZones(after: String, before: String, first: Int, last: Int): SoundZoneConnection
+}
+
+type AccountConnection {
+  edges: [AccountEdge]
+  pageInfo: PageInfo!
+}
+
+type AccountEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Account
+}
+
+type AccountUsersConnection {
+  edges: [AccountUsersEdge]
+  pageInfo: PageInfo!
+}
+
+type AccountUsersEdge {
+  """
+  If the user is a contact (receives administrative emails) for the account
+  """
+  contact: Boolean
+
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The user"""
+  node: User
+
+  """The invited user role"""
+  role: Role
+}
+
+"""An album"""
+type Album {
+  """The release type"""
+  albumType: AlbumType
+
+  """A pair of colors generated from the album's cover art"""
+  colors: Color
+
+  """The album's cover art"""
+  image: Image
+  name: String
+}
+
+enum AlbumType {
+  album
+  compilation
+  single
+}
+
+"""An artist"""
+type Artist {
+  name: String
+}
+
+"""A pair of complementary colors"""
+type Color {
+  accent: String
+  primary: String
+}
+
+"""
+A curator profile contains the information that is publically
+shown when e.g a schedule or playlist from an account is shared.
+
+"""
+type Curator implements Node {
+  """A full description of the curator"""
+  description: String
+
+  """The curator's ID"""
+  id: ID!
+
+  """An image URL"""
+  image: String
+
+  """A logo URL"""
+  logo: String
+
+  """The curator's name"""
+  name: String
+
+  """A short description of the curator"""
+  shortDescription: String
+
+  """The curator's spotify profile"""
+  spotifyProfile: String
+
+  """A link to the curator's website"""
+  url: String
+
+  """
+  If the curator has been verified as authentic by Soundtrack Your Brand
+  """
+  verified: Boolean
+}
+
+scalar Date
+
+"""A physical device that that plays music."""
+type Device implements Node {
+  id: ID!
+  label: String
+  name: String
+
+  """The device's current playback state"""
+  playback: Playback
+  playbackState: DevicePlaybackState @deprecated(reason: "Use playback.state instead")
+  softwareVersion: String
+
+  """The sound zone the device is paired with"""
+  soundZone: SoundZone
+
+  """What type of device this is, e.g mobile or desktop"""
+  type: String
+
+  """The vendor who has manufactured the device"""
+  vendorId: String
+
+  """The device's currently set volume"""
+  volume: Volume @deprecated(reason: "Use playback.volume instead")
+}
+
+"""The current state of playback for a device"""
+type DevicePlaybackState {
+  paused: Boolean
+}
+
+type Error implements Node {
+  cause: String
+  description: String
+  id: ID!
+  occurredAt: Date
+  resolved: Boolean
+  resolvedAt: Date
+  type: String
+}
+
+type ErrorConnection {
+  edges: [ErrorEdge]
+  pageInfo: PageInfo!
+}
+
+type ErrorEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Error
+}
+
+enum ErrorState {
+  all
+  unresolved
+}
+
+"""An image"""
+type Image {
+  height: Int
+  url: String
+  width: Int
+}
+
+"""
+Represents a sample of artists and tracks that well represent the overall
+sound of the soundtrack.
+
+"""
+type InfluentialArtist {
+  name: String
+  tracks(after: String, before: String, first: Int, last: Int): TrackConnection
+}
+
+type InfluentialArtistConnection {
+  edges: [InfluentialArtistEdge]
+  pageInfo: PageInfo!
+}
+
+type InfluentialArtistEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: InfluentialArtist
+}
+
+"""A physical location, like a store. Can have one or many sound zones"""
+type Location implements Node {
+  address: String
+  address2: String
+  city: String
+  countryName: String
+  id: ID!
+  isoCountry: String
+  name: String
+  postalCode: String
+
+  """The sound zones at the location"""
+  soundZones(after: String, before: String, first: Int, last: Int): SoundZoneConnection
+  state: String
+  timezone: String
+}
+
+type LocationConnection {
+  edges: [LocationEdge]
+  pageInfo: PageInfo!
+}
+
+type LocationEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Location
+}
+
+"""A music library contains added soundtracks, playlists and schedules."""
+type MusicLibrary {
+  """The added playlists"""
+  playlists(after: String, before: String, first: Int, last: Int): MusicLibraryPlaylistsConnection
+
+  """The added schedules"""
+  schedules(after: String, before: String, first: Int, last: Int): MusicLibrarySchedulesConnection
+
+  """The added soundtracks"""
+  soundtracks(after: String, before: String, first: Int, last: Int): MusicLibrarySoundtracksConnection
+}
+
+type MusicLibraryPlaylistsConnection {
+  edges: [MusicLibraryPlaylistsEdge]
+  pageInfo: PageInfo!
+}
+
+type MusicLibraryPlaylistsEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  node: Playlist
+}
+
+type MusicLibrarySchedulesConnection {
+  edges: [MusicLibrarySchedulesEdge]
+  pageInfo: PageInfo!
+}
+
+type MusicLibrarySchedulesEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  node: Schedule
+}
+
+type MusicLibrarySoundtracksConnection {
+  edges: [MusicLibrarySoundtracksEdge]
+  pageInfo: PageInfo!
+}
+
+type MusicLibrarySoundtracksEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  node: Soundtrack
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+"""What's currently playing at a sound zone"""
+type NowPlaying {
+  """The PlaybackSource the current track is from"""
+  playFrom: PlaybackSource
+  startedAt: Date
+  track: Track
+}
+
+input NowPlayingUpdateInput {
+  soundZone: ID!
+}
+
+type NowPlayingUpdatePayload {
+  nowPlaying: NowPlaying
+}
+
+type PageInfo {
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+}
+
+input PauseInput {
+  soundZone: ID!
+}
+
+type PausePayload {
+  soundZone: ID
+  status: String
+}
+
+type PendingAccountUsersConnection {
+  edges: [PendingAccountUsersEdge]
+  pageInfo: PageInfo!
+}
+
+type PendingAccountUsersEdge {
+  """
+  If the invited user is a contact (receives administrative emails) for the account
+  """
+  contact: Boolean
+
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The invited user"""
+  node: PendingUser
+
+  """The invited user's role"""
+  role: Role
+}
+
+"""An invited user"""
+type PendingUser {
+  """The invited email"""
+  email: String!
+}
+
+"""Information about the player's playback"""
+type Playback {
+  """The playing state"""
+  state: PlaybackState
+  volume: Volume
+}
+
+"""Music sources that can be assigned to a sound zone"""
+union PlaybackSource = Soundtrack | Playlist | Schedule
+
+enum PlaybackState {
+  paused
+  playing
+}
+
+input PlaybackUpdateInput {
+  soundZone: ID!
+}
+
+type PlaybackUpdatePayload {
+  playback: Playback
+}
+
+input PlayInput {
+  soundZone: ID!
+}
+
+"""A playlist"""
+type Playlist implements Node {
+  """The curator of the playlist"""
+  curator: Curator
+  id: ID!
+  name: String
+
+  """Information about how the playlist should be presented visually"""
+  presentation(
+    """What product flavour the presentation should be in"""
+    product: Product = soundtrack
+  ): Presentation
+  tracks(
+    after: String
+
+    """ISO 3166-1 alpha-2, i.e "SE" for Sweden"""
+    country: String!
+    first: Int
+  ): TrackConnection
+}
+
+type PlayPayload {
+  soundZone: ID
+  status: String
+}
+
+"""How something should be presented interfaces"""
+type Presentation {
+  """A matching pair of colors"""
+  colors: Color
+
+  """A list of thumbnails"""
+  image: Thumbnails
+}
+
+"""The two product flavours"""
+enum Product {
+  soundtrack
+  spotify
+}
+
+type PublicAPIClient {
+  accounts(after: String, before: String, first: Int, last: Int): PublicApiClientAccountsConnection
+  id: ID!
+}
+
+type PublicApiClientAccountsConnection {
+  edges: [PublicApiClientAccountsEdge]
+  pageInfo: PageInfo!
+}
+
+type PublicApiClientAccountsEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+  node: Account
+}
+
+type QueryInfo {
+  complexity: Int
+}
+
+enum Role {
+  admin
+  contact
+  finance
+  owner
+  user
+}
+
+type RootMutationType {
+  """Pause playback of a sound zone"""
+  pause(input: PauseInput!): PausePayload
+
+  """Start playback of a sound zone"""
+  play(input: PlayInput!): PlayPayload
+
+  """Change playback source of a sound zone"""
+  setPlayFrom(input: SetPlayFromInput!): SetPlayFromPayload
+
+  """Set the volume of a sound zone"""
+  setVolume(input: SetVolumeInput!): SetVolumePayload
+
+  """Skip the current playing track of a sound zone"""
+  skipTrack(input: SkipTrackInput!): SkipTrackPayload
+}
+
+type RootQueryType {
+  """Find an account by ID"""
+  account(id: ID!): Account
+
+  """
+  The main entry point to begin querying and exploring the API.
+  
+  Returns different nodes depending on the current API session.
+  """
+  me: Viewer
+
+  """Find entities implementing the node interface by ID"""
+  node(
+    """The id of an object."""
+    id: ID!
+  ): Node
+
+  """Find the currently playing track by sound zone ID"""
+  nowPlaying(soundZone: ID!): NowPlaying
+
+  """Get the calculated complexity for a query"""
+  queryInfo: QueryInfo
+
+  """Find a sound zone by ID"""
+  soundZone(id: ID!): SoundZone
+}
+
+type RootSubscriptionType {
+  """Get an update when a sound zone starts playing a new track"""
+  nowPlayingUpdate(input: NowPlayingUpdateInput!): NowPlayingUpdatePayload
+
+  """Get updates on when playback changes (play/pause/volume)"""
+  playbackUpdate(input: PlaybackUpdateInput!): PlaybackUpdatePayload
+
+  """
+  Get updates when base information on the sound zone changes, such as the name or playFrom
+  """
+  soundZoneUpdate(input: SoundZoneUpdateInput!): SoundZoneUpdatePayload
+}
+
+"""
+A schedule of what music should play when, during the course of a week
+
+"""
+type Schedule implements Node {
+  """
+  One or more hex colors that can be used to represent the schedule as single color or gradient
+  """
+  colors: [String]
+
+  """The curator for the schedule"""
+  curator: Curator
+  description: String
+  id: ID!
+
+  """The music used in the schedule"""
+  musicLibrary: MusicLibrary
+  name: String
+
+  """
+  The time slots for the schedule.
+  A time slot describes what music should play
+  during what hours on a specific day of week.
+  """
+  slots: [Slot]
+  summary: String
+}
+
+input SetPlayFromInput {
+  soundZone: ID!
+  source: ID!
+}
+
+type SetPlayFromPayload {
+  playFrom: PlaybackSource
+}
+
+input SetVolumeInput {
+  soundZone: ID!
+  volume: Volume!
+}
+
+type SetVolumePayload {
+  soundZone: ID
+  status: String
+  volume: Volume
+}
+
+input SkipTrackInput {
+  soundZone: ID!
+}
+
+type SkipTrackPayload {
+  soundZone: ID
+  status: String
+}
+
+"""
+A sequence of collections (soundtracks or playlists) that should be played
+for a specific period of time.
+
+"""
+type Slot {
+  """
+  The playlists or soundtracks scheduled to play from start to start + duration
+  """
+  collections: [ID]
+  duration: Int
+  id: ID!
+
+  """How this slot should be repeated"""
+  rrule: String
+  start: String
+}
+
+"""
+A soundtrack is a week-long, curated collection of music hand-picked for commercial use
+"""
+type Soundtrack implements Node {
+  """The curator of the soundtrack"""
+  curator: Curator
+  id: ID!
+  name: String
+
+  """How the soundtrack should be presented visually"""
+  presentation(product: Product = soundtrack): Presentation
+
+  """
+  A summary of the soundtrack's music.
+  Must provide a market as an ISO country since a soundtrack's content
+  may differ based on market.
+  """
+  summary(country: String!): SoundtrackSummary
+}
+
+"""
+A summary describing the soundtrack
+
+"""
+type SoundtrackSummary {
+  """Artists who are influential for the soundtrack"""
+  influentialArtists(after: String, before: String, first: Int, last: Int): InfluentialArtistConnection
+
+  """Samples of tracks that are influential for the soundtrack"""
+  samples(after: String, before: String, first: Int, last: Int): TrackConnection
+}
+
+"""A Sound Zone"""
+type SoundZone implements Node {
+  """The account the sound zone belongs to"""
+  account: Account
+
+  """The sound zone's paired player"""
+  device: Device
+  errors(after: String, before: String, first: Int, last: Int, state: ErrorState): ErrorConnection
+  id: ID!
+
+  """If the sound zone is paired with a player or not"""
+  isPaired: Boolean
+
+  """The location the sound zone belongs to"""
+  location: Location
+  name: String
+
+  """The currently playing track (if any)"""
+  nowPlaying: NowPlaying
+
+  """The URL for the sound zone's now playing display"""
+  nowPlayingDisplayUrl: String
+
+  """The music source currently assigned to the sound zone"""
+  playFrom: PlaybackSource
+
+  """Information about the playback"""
+  playback: Playback
+
+  """The pairing code for the remote"""
+  remoteCode: String!
+
+  """
+  A short id that can be shared publically. Used by e.g the now playing application.
+  """
+  shortId: String!
+
+  """Information about the subscription"""
+  subscription: SoundZoneSubscription
+  timezone: String
+}
+
+type SoundZoneConnection {
+  edges: [SoundZoneEdge]
+  pageInfo: PageInfo!
+}
+
+type SoundZoneEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: SoundZone
+}
+
+"""Subscription information"""
+type SoundZoneSubscription {
+  """If this sound zone has an active subscription or not"""
+  isActive: Boolean
+}
+
+input SoundZoneUpdateInput {
+  soundZone: ID!
+}
+
+type SoundZoneUpdatePayload {
+  soundZone: SoundZone
+}
+
+type StaffRemote {
+  musicLibrary: MusicLibrary
+  soundZone: SoundZone
+}
+
+"""Thumbnails of multiple sizes. Sizes may change in the future"""
+type Thumbnails {
+  large: Image
+  medium: Image
+  mediumSquare: Image
+
+  """The original image"""
+  original: Image
+  small: Image
+  smallSquare: Image
+  tiny: Image
+}
+
+type Track implements Node {
+  album: Album
+  artists: [Artist]
+
+  """The track's duration in milliseconds"""
+  duration: Int
+  explicit: Boolean
+  id: ID!
+
+  """A globally unique ID to identify this recording"""
+  isrc: String!
+  name: String
+
+  """A 30 second preview of the track. Not available for all tracks"""
+  previewUrl: String
+
+  """A URL that can be used to share the track with users"""
+  shareUrl: String
+}
+
+type TrackConnection {
+  edges: [TrackEdge]
+  pageInfo: PageInfo!
+}
+
+type TrackEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: Track
+}
+
+"""A user"""
+type User {
+  """A list of the accounts the user has access to"""
+  accounts(after: String, before: String, first: Int, last: Int): AccountConnection
+  email: String
+  id: ID!
+  name: String
+}
+
+union Viewer = User | PublicAPIClient | Device | StaffRemote
+
+"""Volume can represent values between 0 and 16."""
+scalar Volume
