@@ -69,6 +69,23 @@ type AccountUsersEdge {
   role: Role
 }
 
+input AddToMusicLibraryInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
+
+  """id of the parent account"""
+  parent: ID!
+
+  """id of a soundtrack, playlist or schedule"""
+  source: ID!
+}
+
+type AddToMusicLibraryPayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
+  musicLibrary: MusicLibrary
+}
+
 """An album"""
 type Album {
   """The release type"""
@@ -139,13 +156,15 @@ scalar Date
 
 """A physical device that that plays music."""
 type Device implements Node {
+  """The hardware id of the device, e.g mac address"""
+  hardwareId: String
   id: ID!
   label: String
   name: String
+  pairingCode: String
 
   """The device's current playback state"""
   playback: Playback
-  playbackState: DevicePlaybackState @deprecated(reason: "Use playback.state instead")
   softwareVersion: String
 
   """The sound zone the device is paired with"""
@@ -156,14 +175,6 @@ type Device implements Node {
 
   """The vendor who has manufactured the device"""
   vendorId: String
-
-  """The device's currently set volume"""
-  volume: Volume @deprecated(reason: "Use playback.volume instead")
-}
-
-"""The current state of playback for a device"""
-type DevicePlaybackState {
-  paused: Boolean
 }
 
 type Error implements Node {
@@ -194,34 +205,34 @@ enum ErrorState {
   unresolved
 }
 
-"""An image"""
-type Image {
-  height: Int
-  url: String
-  width: Int
-}
-
 """
 Represents a sample of artists and tracks that well represent the overall
 sound of the soundtrack.
 
 """
-type InfluentialArtist {
+type FeaturedArtist {
   name: String
   tracks(after: String, before: String, first: Int, last: Int): TrackConnection
 }
 
-type InfluentialArtistConnection {
-  edges: [InfluentialArtistEdge]
+type FeaturedArtistConnection {
+  edges: [FeaturedArtistEdge]
   pageInfo: PageInfo!
 }
 
-type InfluentialArtistEdge {
+type FeaturedArtistEdge {
   """A cursor for use in pagination"""
   cursor: String!
 
   """The item at the end of the edge"""
-  node: InfluentialArtist
+  node: FeaturedArtist
+}
+
+"""An image"""
+type Image {
+  height: Int
+  url: String
+  width: Int
 }
 
 """A physical location, like a store. Can have one or many sound zones"""
@@ -252,6 +263,32 @@ type LocationEdge {
 
   """The item at the end of the edge"""
   node: Location
+}
+
+input LoginDeviceInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
+  hardwareId: String!
+  vendorSecret: String!
+}
+
+type LoginDevicePayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
+  token: String
+}
+
+input LoginUserInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
+  email: String!
+  password: String!
+}
+
+type LoginUserPayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
+  token: String
 }
 
 """A music library contains added soundtracks, playlists and schedules."""
@@ -336,10 +373,14 @@ type PageInfo {
 }
 
 input PauseInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID!
 }
 
 type PausePayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID
   status: String
 }
@@ -395,6 +436,8 @@ type PlaybackUpdatePayload {
 }
 
 input PlayInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID!
 }
 
@@ -420,6 +463,8 @@ type Playlist implements Node {
 }
 
 type PlayPayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID
   status: String
 }
@@ -468,6 +513,15 @@ enum Role {
 }
 
 type RootMutationType {
+  """add an entry to a music library"""
+  addToMusicLibrary(input: AddToMusicLibraryInput!): AddToMusicLibraryPayload
+
+  """login a device with hardware id and vendor secret"""
+  loginDevice(input: LoginDeviceInput!): LoginDevicePayload
+
+  """login a user with username and password"""
+  loginUser(input: LoginUserInput!): LoginUserPayload
+
   """Pause playback of a sound zone"""
   pause(input: PauseInput!): PausePayload
 
@@ -553,30 +607,42 @@ type Schedule implements Node {
 }
 
 input SetPlayFromInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID!
   source: ID!
 }
 
 type SetPlayFromPayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   playFrom: PlaybackSource
 }
 
 input SetVolumeInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID!
   volume: Volume!
 }
 
 type SetVolumePayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID
   status: String
   volume: Volume
 }
 
 input SkipTrackInput {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID!
 }
 
 type SkipTrackPayload {
+  """A unique identifier for the client performing the mutation."""
+  clientMutationId: String
   soundZone: ID
   status: String
 }
@@ -605,11 +671,13 @@ A soundtrack is a week-long, curated collection of music hand-picked for commerc
 type Soundtrack implements Node {
   """The curator of the soundtrack"""
   curator: Curator
+  description: String
   id: ID!
   name: String
 
   """How the soundtrack should be presented visually"""
   presentation(product: Product = soundtrack): Presentation
+  shortDescription: String
 
   """
   A summary of the soundtrack's music.
@@ -624,11 +692,15 @@ A summary describing the soundtrack
 
 """
 type SoundtrackSummary {
-  """Artists who are influential for the soundtrack"""
-  influentialArtists(after: String, before: String, first: Int, last: Int): InfluentialArtistConnection
+  """
+  Samples of artists that well represent the overall sound of the soundtrack
+  """
+  featuredArtists(after: String, before: String, first: Int, last: Int): FeaturedArtistConnection
 
-  """Samples of tracks that are influential for the soundtrack"""
-  samples(after: String, before: String, first: Int, last: Int): TrackConnection
+  """
+  Samples of tracks that well represent the overall sound of the soundtrack
+  """
+  featuredSongs(after: String, before: String, first: Int, last: Int): TrackConnection
 }
 
 """A Sound Zone"""
@@ -670,7 +742,6 @@ type SoundZone implements Node {
 
   """Information about the subscription"""
   subscription: SoundZoneSubscription
-  timezone: String
 }
 
 type SoundZoneConnection {
@@ -734,7 +805,10 @@ type Track implements Node {
   """A 30 second preview of the track. Not available for all tracks"""
   previewUrl: String
 
-  """A URL that can be used to share the track with users"""
+  """
+  A URL that can be used to share the track with users. Does not necessarily
+  always point to the same provider (e.g. Spotify)
+  """
   shareUrl: String
 }
 
