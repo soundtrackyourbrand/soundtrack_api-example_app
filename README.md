@@ -6,7 +6,7 @@ Please note that you should not build an app where the secrets can be found in t
 ## Prerequisites
 * A Soundtrack subscription. Please see www.soundtrackyourbrand.com to sign up
 * API credentials. Request them via [this page](https://api.soundtrackyourbrand.com/v2/docs)
-* [nodejs](https://nodejs.org/en/download/) (**Note: node version >=4 <=9**) and [yarn](https://yarnpkg.com/lang/en/docs/install/)
+* [nodejs](https://nodejs.org/en/download/) (**Note: node version >=10**) and [yarn](https://yarnpkg.com/lang/en/docs/install/)
 
 ## Terms of use
 By using the Soundtrack API, you accept to our [Terms of use](https://www.soundtrackyourbrand.com/legal/api-terms-of-use).
