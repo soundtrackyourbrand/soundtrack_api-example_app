@@ -1,10 +1,11 @@
 import React from 'react';
 
 import {
-  graphql,
   createFragmentContainer,
   requestSubscription
 } from 'react-relay';
+
+import graphql from 'babel-plugin-relay/macro';
 
 import environment from './createRelayEnvironment';
 import { CardHeader } from 'material-ui/Card';

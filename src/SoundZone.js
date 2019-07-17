@@ -1,9 +1,10 @@
 import React from 'react';
 
 import {
-  graphql,
   requestSubscription,
 } from 'react-relay';
+
+import graphql from 'babel-plugin-relay/macro';
 
 import environment from './createRelayEnvironment';
 import SoundZoneDisplay from './SoundZoneDisplay';

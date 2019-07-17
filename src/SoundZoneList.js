@@ -1,9 +1,10 @@
 import React from 'react';
 
 import {
-  graphql,
   createPaginationContainer,
 } from 'react-relay';
+
+import graphql from 'babel-plugin-relay/macro';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import List from 'material-ui/List';

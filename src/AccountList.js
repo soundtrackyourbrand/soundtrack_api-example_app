@@ -1,9 +1,10 @@
 import React from 'react';
 
 import {
-  graphql,
   createFragmentContainer
 } from 'react-relay';
+
+import graphql from 'babel-plugin-relay/macro';
 
 import SoundZoneList from './SoundZoneList';
 import {List, ListItem} from 'material-ui/List';
