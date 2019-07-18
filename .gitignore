@@ -1,3 +1,4 @@
 node_modules
 schema.graphql
 .tool-versions
+src/__generated__/
