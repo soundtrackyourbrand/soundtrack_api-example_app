@@ -46,7 +46,7 @@ export default createFragmentContainer(
   NowPlayingDisplay,
   graphql`
     fragment NowPlayingDisplay on NowPlaying {
-      track {
+      track(market: US) {
         name
         artists {
           name
