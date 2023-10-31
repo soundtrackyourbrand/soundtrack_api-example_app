@@ -32,7 +32,7 @@ export default createFragmentContainer(
   AccountList,
   graphql`
     fragment AccountList on PublicAPIClient {
-      accounts(first: $accountCount) {
+      accounts(first: $accountCount, orderBy: {field: BUSINESS_NAME, direction: ASC }) {
         edges {
           node {
             id
